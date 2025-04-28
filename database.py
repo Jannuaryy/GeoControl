@@ -1,6 +1,6 @@
 import sqlite3
 
-conn = sqlite3.connect('my_database.db')
+conn = sqlite3.connect('database.db')
 
 cursor = conn.cursor()
 
@@ -17,7 +17,8 @@ CREATE TABLE IF NOT EXISTS Users (
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS Offices (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT
+    name TEXT,
+    location TEXT
 )
 ''')
 
