@@ -4,6 +4,7 @@
     <title>Лого</title>
     <style>
         table {
+            width: 100%;
             text-align: center;
             border-collapse: collapse;
             border-spacing: 5px;
@@ -71,7 +72,7 @@
             <td>{{ location['user']['avatar'] }}</td>
             <td>{{ location['user']['name'] }}</td>
             <td>{{ location['location']['datetime'] }}</td>
-            <td>{{ location['location']['office_distance']}} от {{location['location']['location'] }}</td>
+            <td>{{ location['location']['office_distance']}}м от {{location['location']['location'] }}</td>
         </tr>
         {% endfor %}
     </tbody>
