@@ -26,7 +26,7 @@ class Location(Base):
     datetime = Column(DateTime)
     location = Column(String)
     office_distance = Column(Integer)
-    office_name = Column(String, ForeignKey('offices.name'))
+    id_office = Column(Integer, ForeignKey('offices.id'))
 
     user = relationship("User", back_populates="locations")
     office = relationship("Office", back_populates="locations")
@@ -41,12 +41,14 @@ class Office(Base):
 
     locations = relationship("Location", back_populates="office")
 
+
 class Admin(Base):
     __tablename__ = 'admins'
 
     id = Column(Integer, primary_key=True)
     login = Column(String)
     password = Column(String)
+
 
 # Функция для хеширования пароля
 def hash_password(password):
@@ -69,23 +71,23 @@ new_admin = Admin(
 #session.add(new_admin)
 
 # Пример добавления нового офиса
-new_office = Office(name='МИСИС', location='Somewhere')
-#session.add(new_office)
+new_office = Office(name='МФТИ', location='55.929508 37.518873')
+session.add(new_office)
 
 # Пример добавления нового пользователя
-new_user = User(phone='123', chat_id='123', name='Katya', avatar='Katya.png')
-#session.add(new_user)
+new_user = User(phone='125', chat_id='125', name='Anya', avatar='Anya.png')
+session.add(new_user)
 session.commit()
 
 # Пример добавления новой локации
 new_location = Location(
-    id_user=2,
-    datetime=datetime(2025, 12, 4, 10, 0),
-    location='Somewhere',
-    office_distance=200,
-    office_name='МИСИС'
+    id_user=3,
+    datetime=datetime(2025, 10, 5, 9, 0),
+    location='55.929509 37.518872',
+    office_distance=300,
+    id_office=2
 )
-#session.add(new_location)
+session.add(new_location)
 session.commit()
 
 session.close()
