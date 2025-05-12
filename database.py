@@ -72,11 +72,11 @@ new_admin = Admin(
 
 # Пример добавления нового офиса
 new_office = Office(name='МФТИ', location='55.929508 37.518873')
-session.add(new_office)
+#session.add(new_office)
 
 # Пример добавления нового пользователя
 new_user = User(phone='125', chat_id='125', name='Anya', avatar='Anya.png')
-session.add(new_user)
+#session.add(new_user)
 session.commit()
 
 # Пример добавления новой локации
@@ -87,7 +87,7 @@ new_location = Location(
     office_distance=300,
     id_office=2
 )
-session.add(new_location)
+#session.add(new_location)
 session.commit()
 
 session.close()
