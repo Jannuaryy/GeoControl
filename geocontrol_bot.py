@@ -11,20 +11,11 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-# Определяем функцию-обработчик сообщений.
-# У неё два параметра, updater, принявший сообщение и контекст - дополнительная информация о сообщении.
 async def echo(update, context):
-    # У объекта класса Updater есть поле message,
-    # являющееся объектом сообщения.
-    # У message есть поле text, содержащее текст полученного сообщения,
-    # а также метод reply_text(str),
-    # отсылающий ответ пользователю, от которого получено сообщение.
     await update.message.reply_text(update.message.text)
 
 
 def main():
-    # Создаём объект Application.
-    # Вместо слова "TOKEN" надо разместить полученный от @BotFather токен
     application = Application.builder().token(BOT_TOKEN).build()
 
     # Создаём обработчик сообщений типа filters.TEXT
