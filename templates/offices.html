@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>   </title>
+    <title>Офисы</title>
     <style>
         table {
             width: 100%;
@@ -19,8 +19,13 @@
             color: #F56433;
         }
         td {
-            padding: 10px;
-            color: #8D8173;
+            padding: 0;
+        }
+        tr {
+            border-bottom: 1px solid #d0d0d0;
+        }
+        tr:last-child {
+            border-bottom: none;
         }
         .nav-buttons {
             display: flex;
@@ -37,7 +42,6 @@
             text-decoration: none;
             transition: background-color 0.3s;
         }
-
         .nav-button.active {
             background-color: #757575;
             color: white;
@@ -66,7 +70,20 @@
             transition: background-color 0.3s;
         }
         .save-button:hover {
-            background-color: #8D8173;
+            background-color: #6D6153;
+        }
+        input {
+            padding: 10px 5px;
+            border: 1px solid #8D8173;
+            border-radius: 4px;
+            text-align: center;
+            width: 100%;
+            box-sizing: border-box;
+            border: none;
+            background: transparent;
+        }
+        form {
+            margin: 0;
         }
     </style>
 </head>
@@ -78,22 +95,34 @@
     <a href="/offices" class="nav-button {% if request.path == '/offices' %}active{% endif %}">Офисы</a>
     <a href="/admin" class="nav-button {% if request.path == '/admin' %}active{% endif %}">Админ</a>
 </div>
-
-<table>
-    <thead>
+{% if error_message %}
+<div style="color: red; margin: 10px 0; padding: 10px; background: #ffecec; border-radius: 4px;">
+    {{ error_message }}
+</div>
+{% endif %}
+<form method="POST" action="/offices">
+    <table>
+        {% for office in offices %}
         <tr>
-            <th>Мои офисы</th>
+            <td><input type="text" name="location_{{ office['id'] }}" value="{{ office['location'] }}"></td>
+            <td><input type="text" name="name_{{ office['id'] }}" value="{{ office['name'] }}"></td>
         </tr>
-    </thead>
-    {% for office in offices %}
-    <tr>
-        <td>{{ office['location'] }}</td>
-        <td>{{ office['name'] }}</td>
-    </tr>
-    {% endfor %}
-</table>
-<div class="save-container">
-    <button class="save-button">Сохранить</button>
+        {% endfor %}
+        <tr class="new-row">
+            <td><input type="text" name="new_location" placeholder="Введите локацию"></td>
+            <td><input type="text" name="new_name" placeholder="Введите название"></td>
+        </tr>
+    </table>
+    <div class="save-container">
+        <button type="submit" class="save-button">Сохранить</button>
+    </div>
+</form>
+<div style="margin: 10px 0; padding: 10px; background: #f5f5dc; border-radius: 4px;">
+    <p>Добавьте строку в формате:широта долгота; Название организации, чтобы добавить новый офис.</p>
+    <p>Удалите строку, чтобы удалить офис.</p>
+    <p>Нажмите сохранить, чтобы применить изменения.</p>
+    <p>Пример ввода: 55.729825 37.609731 МИСИС</p>
+</div>
 <div class="arrow-buttons">
     <button class="arrow-button" onclick="window.location.href='/locations'">←</button>
 </div>

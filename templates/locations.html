@@ -16,11 +16,15 @@
             font-weight: 300;
             padding: 12px 10px;
             border-bottom: 2px solid #F56433;
-            color: #F56433;
         }
         td {
-            padding: 10px;
-            color: #8D8173;
+            padding: 15px;
+        }
+        tr {
+            border-bottom: 1px solid #d0d0d0;
+        }
+        tr:last-child {
+            border-bottom: none;
         }
         .nav-buttons {
             display: flex;
@@ -67,17 +71,16 @@
 </div>
 <table>
     <tbody>
-        {% for location in locations %}
-        <tr>
-            <td>{{ location['user']['avatar'] }}</td>
-            <td>{{ location['user']['name'] }}</td>
-            <td>{{ location['location']['datetime'] }}</td>
-            <td>{{ location['location']['office_distance']}}м от {{location['location']['location'] }}</td>
-        </tr>
-        {% endfor %}
+    {% for location in locations %}
+    <tr>
+        <td><img src="{{location['user']['avatar']}}" alt="здесь должна была быть картинка, но не нашлась"></td>
+        <td>{{ location['user']['name'] }}</td>
+        <td>{{ location['location']['datetime'] }}</td>
+        <td>{{ location['location']['office_distance']}}м от {{location['location']['office_name'] }}</td>
+    </tr>
+    {% endfor %}
     </tbody>
 </table>
-
 
 <div class="arrow-buttons">
     <button class="arrow-button" onclick="window.location.href='/locations'">←</button>

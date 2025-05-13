@@ -11,6 +11,7 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
+
 def weak_hash_md5(password):
     return hashlib.md5(password.encode()).hexdigest()
 
@@ -42,12 +43,39 @@ def locations():
     return render_template('locations.html', locations=locations_with_users)
 
 
-@app.route('/offices')
+@app.route('/offices', methods=['GET', 'POST'])
 def offices():
     conn = get_db_connection()
+    error_message = None
+    if request.method == 'POST':
+        has_empty_cells = False
+        for key, value in request.form.items():
+            if key.startswith('location_') or key.startswith('name_'):
+                if not value.strip():
+                    has_empty_cells = True
+                    break
+        new_location = request.form.get('new_location', '').strip()
+        new_name = request.form.get('new_name', '').strip()
+        if (has_empty_cells or (new_location and not new_name) or (not new_location and new_name)) and not (
+                not new_location and not new_name):
+            error_message = 'Некорректный ввод: введите строку в формате: широта, долгота название'
+        else:
+            for key, value in request.form.items():
+                parts = key.split('_')
+                what, office_id = parts
+                if what == 'location':
+                    conn.execute('UPDATE Offices SET location = ? WHERE id = ?', (value, office_id))
+                elif what == 'name':
+                    conn.execute('UPDATE Offices SET name = ? WHERE id = ?', (value, office_id))
+            if new_location and new_name:
+                conn.execute('INSERT INTO Offices (location, name) VALUES (?, ?)', (new_location, new_name))
+            conn.execute(
+                'DELETE FROM Offices WHERE (location = "" OR location IS NULL) AND (name = "" OR name IS NULL)')
+            conn.commit()
+            return redirect(url_for('offices'))
     offices = conn.execute('SELECT * FROM Offices').fetchall()
     conn.close()
-    return render_template('offices.html', offices=offices)
+    return render_template('offices.html', offices=offices, error_message=error_message)
 
 
 @app.route('/admin')
