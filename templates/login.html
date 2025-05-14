@@ -62,6 +62,7 @@
 </head>
 <body>
     <div class="login-container">
+        <img src="static/geocontrol_logo.png" style="max-height:60px;max-width:auto;" align="absmiddle"> <h1>GeoControl</h1>
         <form method="POST" action="{{ url_for('logins') }}">
             <div class="input-group">
                 <label for="login">Логин:</label>
@@ -72,6 +73,9 @@
                 <input type="password" id="password" name="password" placeholder="••••••••" required>
             </div>
             <button type="submit" class="login-button">Войти</button>
+            {% if error %}
+                <br><br><span style="color:red">Ошибка: {{error}}</span>
+            {% endif %}
         </form>
     </div>
 </body>
