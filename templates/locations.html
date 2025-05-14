@@ -74,9 +74,13 @@
     {% for location in locations %}
     <tr>
         <td><img style="max-height:100px;max-width:auto;border-radius:50px" src="static/avatars/{{location['user']['avatar']}}" alt="здесь должна была быть картинка, но не нашлась"></td>
-        <td>{{ location['user']['name'] }}</td>
-        <td>{{ location['location']['datetime'] }}</td>
+        <td>{{ location['user']['name'] }}
+            {% if location['user']['phone'] %}
+                <br><a href="tel:{{location['user']['phone']}}">{{location['user']['phone']}}</a>
+            {% endif %}
+        </td>
         <td>{{ location['location']['office_distance']}}м от {{location['location']['office_name'] }}</td>
+        <td>{{ location['location']['datetime'] }}</td>
     </tr>
     {% endfor %}
     </tbody>

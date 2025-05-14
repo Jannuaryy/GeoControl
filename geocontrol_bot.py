@@ -43,6 +43,7 @@ async def process(update, context):
     # отсылающий ответ пользователю, от которого получено сообщение.
     db_user = get_db_user(update)
 
+    # Если получили информацию о местоположении:
     location = update.message.location
     if location:
         conn = get_db_connection()
@@ -52,7 +53,20 @@ async def process(update, context):
         await update.message.reply_text("{}, Ваше местоположение учтено! ({})".format(db_user['name'], location)) # Location(latitude=55.563644, longitude=37.569185)
         return
 
-    await update.message.reply_text("Привет, {}! Я бот GeoControl. Сообщи свое местоположение по кнопке ниже!".format(db_user['name']), reply_markup = build_keyboard())
+    # Если получили телефон:
+    contact = update.message.contact
+    if contact:
+        conn = get_db_connection()
+        conn.execute('UPDATE users SET phone = ? WHERE id = ?', (contact.phone_number, db_user['id'])).fetchall()
+        conn.commit()
+        db_user = get_db_user(update)
+
+    if not db_user['phone']:
+        await update.message.reply_text("Здравствуйте, {}! Я бот GeoControl. Пожалуйста, авторизуйтесь с помощью кнопки ниже:".format(db_user['name']),
+                  reply_markup = ReplyKeyboardMarkup([[KeyboardButton("Войти в систему", request_contact = True)]], one_time_keyboard=True))
+        return
+
+    await update.message.reply_text("Здравствуйте, {}! Я бот GeoControl. Пожалуйста, сообщите свое местоположение по кнопке ниже:".format(db_user['name']), reply_markup = build_keyboard())
     #await update.message.reply_text("Привет, db_user[name]={}, db_user[chat_id]={}, я бот geocontrol. Твое echo: {}".format(db_user['name'], db_user['chat_id'], update.message.text), reply_markup = build_keyboard())
 
 
@@ -72,6 +86,7 @@ def main():
     application.add_handler(text_handler)
     application.add_handler(CommandHandler("start", process))
     application.add_handler(MessageHandler(filters.LOCATION, process))
+    application.add_handler(MessageHandler(filters.CONTACT, process))
 
     # Запускаем приложение.
     application.run_polling()
