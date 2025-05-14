@@ -48,7 +48,7 @@ async def process(update, context):
     if location:
         conn = get_db_connection()
         conn.execute('INSERT INTO Locations (id_user, datetime, location, office_distance) VALUES (?, ?, ?, 500)', # id_office
-            (db_user['id'], datetime.now(), '{} {} {}'.format(location.latitude, location.longitude, location.horizontal_accuracy if location.horizontal_accuracy else 0))).fetchall()
+            (db_user['id'], datetime.now(), '{} {}'.format(location.latitude, location.longitude))).fetchall()
         conn.commit()
         await update.message.reply_text("{}, Ваше местоположение учтено! ({})".format(db_user['name'], location)) # Location(latitude=55.563644, longitude=37.569185)
         return

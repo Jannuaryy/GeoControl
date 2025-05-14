@@ -73,13 +73,19 @@
     <tbody>
     {% for location in locations %}
     <tr>
-        <td><img style="max-height:100px;max-width:auto;border-radius:50px" src="static/avatars/{{location['user']['avatar']}}" alt="здесь должна была быть картинка, но не нашлась"></td>
+        <td align="center">
+        {% if location['user']['avatar'] %}
+        <img style="max-height:100px;max-width:auto;border-radius:50px" src="static/avatars/{{location['user']['avatar']}}" alt="здесь должна была быть картинка, но не нашлась">
+        {% else %}
+        <div style="width:100px;height:100px;border:1px solid grey;border-radius:50px"><br><br>Нет фото</div>
+        {% endif %}
+        </td>
         <td>{{ location['user']['name'] }}
             {% if location['user']['phone'] %}
                 <br><a href="tel:{{location['user']['phone']}}">{{location['user']['phone']}}</a>
             {% endif %}
         </td>
-        <td>{{ location['location']['office_distance']}}м от {{location['location']['office_name'] }}</td>
+        <td>{{ location['location']['office_distance']}}м от {{location['location']['office_name'] }}<br><a target="_blank" href="https://yandex.ru/maps/?text={{ location['location']['location'] }}">на карте</a></td>
         <td>{{ location['location']['datetime'] }}</td>
     </tr>
     {% endfor %}
