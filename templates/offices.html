@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Офисы</title>
+    <title>Офисы - GeoControl</title>
     <style>
         table {
             width: 100%;
@@ -93,7 +93,6 @@
 <div class="nav-buttons">
     <a href="/locations" class="nav-button {% if request.path == '/locations' %}active{% endif %}">Локации</a>
     <a href="/offices" class="nav-button {% if request.path == '/offices' %}active{% endif %}">Офисы</a>
-    <a href="/admin" class="nav-button {% if request.path == '/admin' %}active{% endif %}">Админ</a>
 </div>
 {% if error_message %}
 <div style="color: red; margin: 10px 0; padding: 10px; background: #ffecec; border-radius: 4px;">

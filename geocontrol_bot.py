@@ -60,14 +60,31 @@ async def process(update, context):
         conn.execute('UPDATE users SET phone = ? WHERE id = ?', (contact.phone_number, db_user['id'])).fetchall()
         conn.commit()
         db_user = get_db_user(update)
+        await update.message.reply_text("Спасибо, Вы вошли в систему под номером телефона: {}".format(contact.phone_number))
 
     if not db_user['phone']:
         await update.message.reply_text("Здравствуйте, {}! Я бот GeoControl. Пожалуйста, авторизуйтесь с помощью кнопки ниже:".format(db_user['name']),
                   reply_markup = ReplyKeyboardMarkup([[KeyboardButton("Войти в систему", request_contact = True)]], one_time_keyboard=True))
-        return
-
-    await update.message.reply_text("Здравствуйте, {}! Я бот GeoControl. Пожалуйста, сообщите свое местоположение по кнопке ниже:".format(db_user['name']), reply_markup = build_keyboard())
+    else:
+        await update.message.reply_text("На связи бот GeoControl! {}, пожалуйста, сообщите свое местоположение по кнопке ниже:".format(db_user['name']), reply_markup = build_keyboard())
     #await update.message.reply_text("Привет, db_user[name]={}, db_user[chat_id]={}, я бот geocontrol. Твое echo: {}".format(db_user['name'], db_user['chat_id'], update.message.text), reply_markup = build_keyboard())
+
+    # скачать аватарку:
+    if not db_user['avatar']:
+        res = await update.effective_user.get_profile_photos(limit=1)
+        if int(res.total_count) > 0:
+            photo = res.photos[0][-1]
+            photo_file = await photo.get_file()
+            avatar = db_user['chat_id']+photo_file.file_path.split('/')[-1].split('.')[-1]
+            await photo_file.download_to_drive('static/avatars/'+avatar)
+
+            conn = get_db_connection()
+            conn.execute('UPDATE users SET avatar = ? WHERE id = ?', (avatar, db_user['id'])).fetchall()
+            conn.commit()
+
+            #await photo_file.download_to_drive()
+            #await update.effective_user.send_photo(photo.file_id) # отправляет фото в чат с пользователем
+            #await update.message.reply_text("photo.file_id: {}, photo_file.file_path={}, custom_path".format(photo.file_id, photo_file.file_path, custom_path))
 
 
 def main():

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Лого</title>
+    <title>Локации - GeoControl</title>
     <style>
         table {
             width: 100%;
@@ -67,7 +67,6 @@
 <div class="nav-buttons">
     <a href="/locations" class="nav-button {% if request.path == '/locations' %}active{% endif %}">Локации</a>
     <a href="/offices" class="nav-button {% if request.path == '/offices' %}active{% endif %}">Офисы</a>
-    <a href="/admin" class="nav-button {% if request.path == '/admin' %}active{% endif %}">Админ</a>
 </div>
 <table>
     <tbody>
@@ -93,7 +92,6 @@
 </table>
 
 <div class="arrow-buttons">
-    <button class="arrow-button" onclick="window.location.href='/locations'">←</button>
     <button class="arrow-button" onclick="window.location.href='/offices'">→</button>
 </div>
 </body>
