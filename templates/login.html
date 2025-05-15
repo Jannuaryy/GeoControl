@@ -61,18 +61,24 @@
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <form method="POST" action="{{ url_for('logins') }}">
-            <div class="input-group">
-                <label for="login">Логин:</label>
-                <input type="text" id="login" name="login" placeholder="Введите логин" required>
-            </div>
-            <div class="input-group">
-                <label for="password">Пароль:</label>
-                <input type="password" id="password" name="password" placeholder="••••••••" required>
-            </div>
-            <button type="submit" class="login-button">Войти</button>
-        </form>
+
+<div class="login-container">
+    {% if error %}
+    <div style="color: red; margin: 10px 0; padding: 10px; background: #ffecec; border-radius: 4px;">
+        {{ error }}
     </div>
+    {% endif %}
+    <form method="POST" action="{{ url_for('logins') }}">
+        <div class="input-group">
+            <label for="login">Логин:</label>
+            <input type="text" id="login" name="login" placeholder="Введите логин" required>
+        </div>
+        <div class="input-group">
+            <label for="password">Пароль:</label>
+            <input type="password" id="password" name="password" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="login-button">Войти</button>
+    </form>
+</div>
 </body>
 </html>
