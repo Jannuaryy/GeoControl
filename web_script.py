@@ -1,15 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for
-import sqlite3
 import hashlib
+from db_connection import *
 
 app = Flask(__name__)
-
-
-# Подключение к базе данных
-def get_db_connection():
-    conn = sqlite3.connect('database.db')
-    conn.row_factory = sqlite3.Row
-    return conn
 
 
 def weak_hash_md5(password):
@@ -38,9 +31,8 @@ def locations():
     locations_with_users = []
     for location in locations:
         user = conn.execute('SELECT * FROM Users WHERE id = ?', (location['id_user'],)).fetchall()
-        office = conn.execute('SELECT name FROM Offices WHERE id = ?', (location['id_office'],)).fetchone()
-        office_name = office['name'] if office else None
-        locations_with_users.append({'location': location, 'user': user[0], 'office_name': office_name})
+        office = conn.execute('SELECT * FROM Offices WHERE id = ?', (location['id_office'],)).fetchall()
+        locations_with_users.append({'location': location, 'user': user[0], 'office': next(iter(office), {'name': 'None'})})
     conn.close()
     return render_template('locations.html', locations=locations_with_users)
 
@@ -49,67 +41,53 @@ def locations():
 def offices():
     conn = get_db_connection()
     error_message = None
-
-    def is_valid_location(loc_str):
-        try:
-            parts = loc_str.split()
-            if len(parts) != 2:
-                return False
-            lat, lon = map(float, parts)
-            return -90 <= lat <= 90 and -180 <= lon <= 180
-        except ValueError:
-            return False
-
     if request.method == 'POST':
+        has_empty_cells = False
         for key, value in request.form.items():
-            if '_' in key:
-                field, office_id = key.split('_')[:2]
-                if field in ['location', 'name'] and office_id.isdigit():
-                    current_location = request.form.get(f'location_{office_id}', '').strip()
-                    current_name = request.form.get(f'name_{office_id}', '').strip()
-                    if not current_location and not current_name:
-                        conn.execute('DELETE FROM Offices WHERE id = ?', (office_id,))
-                        conn.commit()
-                    else:
-                        if field == 'name' and not current_name:
-                            error_message = 'Некорректный ввод: введите строку в формате: широта долгота название'
-                            break
-                        if field == 'location' and not current_location and not is_valid_location(current_location):
-                            error_message = 'Некорректный ввод: введите строку в формате: широта долгота название'
-                            break
-                        original = conn.execute(f'SELECT {field} FROM Offices WHERE id = ?', (office_id,)).fetchone()
-                        if original and original[0] != value:
-                            conn.execute(f'UPDATE Offices SET {field} = ? WHERE id = ?', (value, office_id))
-                            error_message = 'Некорректный ввод: введите строку в формате: широта долгота название'
+            if key.startswith('location_') or key.startswith('name_'):
+                if not value.strip():
+                    has_empty_cells = True
+                    break
         new_location = request.form.get('new_location', '').strip()
         new_name = request.form.get('new_name', '').strip()
-
-        if error_message or (new_location and not new_name) or (
-                not new_location and new_name):
-            error_message = 'Ошибка: для нового офиса нужно указать и координаты и название'
+        if (has_empty_cells or (new_location and not new_name) or (not new_location and new_name)) and not (
+                not new_location and not new_name):
+            error_message = 'Некорректный ввод: введите строку в формате: широта, долгота название'
         else:
+            for key, value in request.form.items():
+                parts = key.split('_')
+                what, office_id = parts
+                if what == 'location':
+                    value = value.strip()
+                    if value:
+                        try:
+                            lat, lon = value.split()
+                            lat = lat.strip(',') # очистить запятую, если пользователь скопировал точку из карт, а там через запятую
+                            lon = lon.strip(',')
+                            value = '{} {}'.format(lat, lon)
+                        except:
+                            pass
+                    conn.execute('UPDATE Offices SET location = ? WHERE id = ?', (value, office_id))
+                elif what == 'name':
+                    conn.execute('UPDATE Offices SET name = ? WHERE id = ?', (value, office_id))
             if new_location and new_name:
-                if not is_valid_location(new_location):
-                    error_message = 'Ошибка: неверный формат координат для нового офиса'
-                else:
-                    conn.execute('INSERT INTO Offices (location, name) VALUES (?, ?)', (new_location, new_name))
-
-            if not error_message:
-                conn.commit()
-                return redirect(url_for('offices'))
-
+                new_location = new_location.strip()
+                if new_location:
+                    try:
+                        lat, lon = new_location.split()
+                        lat = lat.strip(',') # очистить запятую, если пользователь скопировал точку из карт, а там через запятую
+                        lon = lon.strip(',')
+                        new_location = '{} {}'.format(lat, lon)
+                    except:
+                        pass
+                conn.execute('INSERT INTO Offices (location, name) VALUES (?, ?)', (new_location, new_name))
+            conn.execute(
+                'DELETE FROM Offices WHERE (location = "" OR location IS NULL) AND (name = "" OR name IS NULL)')
+            conn.commit()
+            return redirect(url_for('offices'))
     offices = conn.execute('SELECT * FROM Offices').fetchall()
     conn.close()
     return render_template('offices.html', offices=offices, error_message=error_message)
-
-
-@app.route('/admin')
-def admin():
-    return render_template('admin.html', offices=offices)
-
-
-if __name__ == '__main__':
-    app.run(debug=True)
 
 
 @app.route('/admin')

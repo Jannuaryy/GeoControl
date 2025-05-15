@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Лого - Вход</title>
+    <title>Вход - GeoControl</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -61,24 +61,22 @@
     </style>
 </head>
 <body>
-
-<div class="login-container">
-    {% if error %}
-    <div style="color: red; margin: 10px 0; padding: 10px; background: #ffecec; border-radius: 4px;">
-        {{ error }}
+    <div class="login-container">
+        <img src="static/geocontrol_logo.png" style="max-height:60px;max-width:auto;" align="absmiddle"> <h1>GeoControl</h1>
+        <form method="POST" action="{{ url_for('logins') }}">
+            <div class="input-group">
+                <label for="login">Логин:</label>
+                <input type="text" id="login" name="login" placeholder="Введите логин" required>
+            </div>
+            <div class="input-group">
+                <label for="password">Пароль:</label>
+                <input type="password" id="password" name="password" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="login-button">Войти</button>
+            {% if error %}
+                <br><br><span style="color:red">Ошибка: {{error}}</span>
+            {% endif %}
+        </form>
     </div>
-    {% endif %}
-    <form method="POST" action="{{ url_for('logins') }}">
-        <div class="input-group">
-            <label for="login">Логин:</label>
-            <input type="text" id="login" name="login" placeholder="Введите логин" required>
-        </div>
-        <div class="input-group">
-            <label for="password">Пароль:</label>
-            <input type="password" id="password" name="password" placeholder="••••••••" required>
-        </div>
-        <button type="submit" class="login-button">Войти</button>
-    </form>
-</div>
 </body>
 </html>
