@@ -5,6 +5,7 @@ from telegram.ext import Application, MessageHandler, CommandHandler, filters
 from datetime import datetime
 from config import BOT_TOKEN
 from db_connection import *
+from functions import *
 
 # Запускаем логгирование
 logging.basicConfig(
@@ -46,12 +47,33 @@ async def process(update, context):
     # Если получили информацию о местоположении:
     location = update.message.location
     if location:
+        user_location = '{} {}'.format(location.latitude, location.longitude)
+        await update.message.reply_text("{}, Ваше местоположение учтено! ({})".format(db_user['name'], user_location)) # Location(latitude=55.563644, longitude=37.569185)
+
         conn = get_db_connection()
-        conn.execute('INSERT INTO Locations (id_user, datetime, location, office_distance) VALUES (?, ?, ?, 500)', # id_office
-            (db_user['id'], datetime.now(), '{} {}'.format(location.latitude, location.longitude))).fetchall()
+
+        # определим расстояние до каждого из офисов и выберем ближайший:
+        distances = []
+        offices = conn.execute('SELECT * FROM Offices').fetchall()
+        for office in offices:
+            try:
+                #distance = calculate_distance(office['location'], user_location)
+                lat1, lon1 = map(float, office['location'].split())
+                lat2, lon2 = map(float, user_location.split()[:2])
+                distance_m = int(haversine(lat1, lon1, lat2, lon2))
+                distances.append({'id_office': office['id'], 'office_name': office['name'], 'distance_m': distance_m})
+            except:
+                pass
+
+            distances = sorted(distances, key=lambda x: x['distance_m'])
+        #await update.message.reply_text("distances: {}".format(distances))
+
+        distance = distances[0] # Ближе всего
+        await update.message.reply_text('Вы находитесь в {} метрах от офиса "{}"'.format(distance['distance_m'], distance['office_name']))
+
+        conn.execute('INSERT INTO Locations (id_user, datetime, location, office_distance, id_office) VALUES (?, ?, ?, ?, ?)', # id_office
+            (db_user['id'], datetime.now(), user_location, distance['distance_m'], distance['id_office'])).fetchall()
         conn.commit()
-        await update.message.reply_text("{}, Ваше местоположение учтено! ({})".format(db_user['name'], location)) # Location(latitude=55.563644, longitude=37.569185)
-        return
 
     # Если получили телефон:
     contact = update.message.contact
@@ -65,7 +87,7 @@ async def process(update, context):
     if not db_user['phone']:
         await update.message.reply_text("Здравствуйте, {}! Я бот GeoControl. Пожалуйста, авторизуйтесь с помощью кнопки ниже:".format(db_user['name']),
                   reply_markup = ReplyKeyboardMarkup([[KeyboardButton("Войти в систему", request_contact = True)]], one_time_keyboard=True))
-    else:
+    elif not location:
         await update.message.reply_text("На связи бот GeoControl! {}, пожалуйста, сообщите свое местоположение по кнопке ниже:".format(db_user['name']), reply_markup = build_keyboard())
     #await update.message.reply_text("Привет, db_user[name]={}, db_user[chat_id]={}, я бот geocontrol. Твое echo: {}".format(db_user['name'], db_user['chat_id'], update.message.text), reply_markup = build_keyboard())
 

@@ -31,7 +31,8 @@ def locations():
     locations_with_users = []
     for location in locations:
         user = conn.execute('SELECT * FROM Users WHERE id = ?', (location['id_user'],)).fetchall()
-        locations_with_users.append({'location': location, 'user': user[0]})
+        office = conn.execute('SELECT * FROM Offices WHERE id = ?', (location['id_office'],)).fetchall()
+        locations_with_users.append({'location': location, 'user': user[0], 'office': next(iter(office), {'name': 'None'})})
     conn.close()
     return render_template('locations.html', locations=locations_with_users)
 
@@ -57,10 +58,28 @@ def offices():
                 parts = key.split('_')
                 what, office_id = parts
                 if what == 'location':
+                    value = value.strip()
+                    if value:
+                        try:
+                            lat, lon = value.split()
+                            lat = lat.strip(',') # очистить запятую, если пользователь скопировал точку из карт, а там через запятую
+                            lon = lon.strip(',')
+                            value = '{} {}'.format(lat, lon)
+                        except:
+                            pass
                     conn.execute('UPDATE Offices SET location = ? WHERE id = ?', (value, office_id))
                 elif what == 'name':
                     conn.execute('UPDATE Offices SET name = ? WHERE id = ?', (value, office_id))
             if new_location and new_name:
+                new_location = new_location.strip()
+                if new_location:
+                    try:
+                        lat, lon = new_location.split()
+                        lat = lat.strip(',') # очистить запятую, если пользователь скопировал точку из карт, а там через запятую
+                        lon = lon.strip(',')
+                        new_location = '{} {}'.format(lat, lon)
+                    except:
+                        pass
                 conn.execute('INSERT INTO Offices (location, name) VALUES (?, ?)', (new_location, new_name))
             conn.execute(
                 'DELETE FROM Offices WHERE (location = "" OR location IS NULL) AND (name = "" OR name IS NULL)')
